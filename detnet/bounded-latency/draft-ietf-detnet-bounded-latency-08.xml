@@ -129,7 +129,7 @@
 <keyword>DetNet, bounded latency, zero congestion loss</keyword>
 
 <abstract>
-    <t>This document references specific queuing mechanisms, defined in other documents, that can be used to control packet transmission at each output port and achieve the DetNet qualities of service. This document presents a timing model for sources, destinations, and the DetNet transit nodes that relay packets that is applicable to all of those referenced queuing mechanisms. Using the model presented in this document, it should be possible for an implementor, user, or standards development organization to select a particular set of queuing mechanisms for each device in a DetNet network, and to select a resource reservation algorithm for that network, so that those elements can work together to provide the DetNet service.</t>
+    <t>This document references specific queuing mechanisms, defined in other documents, that can be used to control packet transmission at each output port and achieve the DetNet qualities of service. This document presents a timing model for sources, destinations, and the DetNet transit nodes that relay packets that is applicable to all of those referenced queuing mechanisms. Using the model presented in this document, it is possible for an implementor, user, or standards development organization to select a particular set of queuing mechanisms for each device in a DetNet network, and to select a resource reservation algorithm for that network, so that those elements can work together to provide the DetNet service.</t>
 </abstract>
 </front>
 
@@ -169,7 +169,7 @@
         DetNet transit nodes that relay packets that is applicable to all of those referenced
         queuing mechanisms. It furthermore provides end-to-end delay bound and backlog bound computations for such mechanisms that can be used by the control plane to provide DetNet QoS.
     </t><t>
-        Using the model presented in this document, it should be possible for an
+        Using the model presented in this document, it is possible for an
         implementor, user, or standards development organization to select
         a particular set of queuing mechanisms for each device in a DetNet network,
         and to select a resource reservation algorithm for that network, so that
@@ -369,8 +369,7 @@
             <t>Not shown in <xref target="fig_timing_model"/> are the other output queues that we
                 presume are also attached to that same output port as the queue shown, and against
                 which this shown queue competes for transmission opportunities.</t>
-            <t>The initial and final measurement point in this analysis (that is, the definition
-                of a "hop") is the point at which a packet is selected for output.  In general,
+            <t>In this analysis, the measurement is from the point a packet is selected for output in a node to the point it is selected for output in the next downstream node (that is the definition of a "hop").  In general,
                 any queue selection method that is suitable for use in a DetNet network includes
                 a detailed specification as to exactly when packets are selected for transmission.
                 Any variations in any of the delay times 1-4 result in a need for additional
@@ -427,23 +426,19 @@
     </section>
     <section title="Queuing delay bound" anchor="queuing">
     <t>
-        For several queuing mechanisms, 
-        queuing_delay_bound is less than the
-        sum of upper bounds on the queuing delays (5,6)
-        at every
-        hop.  This occurs with (1) per-flow queuing, and (2) aggregate queuing with regulators, as explained in <xref target="perflow"/>, <xref target="perclass"/>, and <xref target="queue_model"/>.
+        For several queuing mechanisms, queuing_delay_bound is less than the sum of upper bounds on the queuing delays (5,6)
+        at every hop.  This occurs with (1) per-flow queuing, and (2) aggregate queuing with regulators, as explained in <xref target="perflow"/>, <xref target="perclass"/>, and <xref target="queue_model"/>.
         </t>
     
     <t>For other queuing mechanisms the only available value of queuing_delay_bound
         is the sum of the per-hop queuing delay bounds.
-        In such cases, the computation of per-hop queuing delay bounds must account for the fact that the T-SPEC of a DetNet flow is no longer satisfied at
-        the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node.
+        In such cases, the computation of per-hop queuing delay bounds must account for the fact that the T-SPEC of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. The T-SPEC of a DetNet flow at the ingress of a hop can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has T-SPEC at source equal to 'alpha(t)' for any time period t, and the delay-jitter from source to the ingress of the hop is 'V'. Then, the T-SPEC at the ingress of the hop is 'alpha(t+V)'. For example, consider a DetNet flow with leaky bucket T-SPEC at source with rate r and bucket size b, i.e., alpha(t)=r * t+ b, t>0; alpha(0)=0; then the T-SPEC at the ingress of the hop is r * t + b + r * V, implying that the burstiness is increased by r*V.
     </t>
-        <section title="Per-flow queuing mechanisms" anchor="perflow">
-            <t>
-                With such mechanisms, each flow uses a separate queue inside every node. The service for each queue is abstracted with a guaranteed rate and a latency. For every DetNet flow, a per-node delay bound as well as an end-to-end delay bound can be computed from the traffic specification of this DetNet flow at its source and from the values of rates and latencies at all nodes along its path. The per-flow queuing is used in Guaranteed-Service IntServ. Details of calculation for Guaranteed-Service IntServ are described in <xref target="intserv"/>.
-            </t>
-        </section>
+    <section title="Per-flow queuing mechanisms" anchor="perflow">
+        <t>
+            With such mechanisms, each flow uses a separate queue inside every node. The service for each queue is abstracted with a guaranteed rate and a latency. For every DetNet flow, a per-node delay bound as well as an end-to-end delay bound can be computed from the traffic specification of this DetNet flow at its source and from the values of rates and latencies at all nodes along its path. The per-flow queuing is used in Guaranteed-Service IntServ. Details of calculation for Guaranteed-Service IntServ are described in <xref target="intserv"/>.
+        </t>
+    </section>
 
         <section title="Aggregate queuing mechanisms" anchor="perclass">
             <t>
@@ -640,7 +635,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
         </list>
     </t><t>
         Ideally, neither of these actions are performed on DetNet packets.  Full queues
-        for DetNet packets should occur only when a DetNet flow is misbehaving, and the DetNet
+        for DetNet packets occurs only when a DetNet flow is misbehaving, and the DetNet
         QoS does not include "yellow" service for packets in excess of committed rate.
     </t><t>
         The queue assignment function can be quite complex, even in a
@@ -693,12 +688,12 @@ its (flow) regulation constraints; it is released at the earliest time at which 
             is controlled by time-synchronized gates; each output queue is associated with a gate.
             The gates can be either open or closed. The states of the gates are
             determined by the gate control list (GCL). The GCL specifies the opening and closing
-            times of the gates. The design of GCL should satisfy the requirement of 
+            times of the gates. The design of GCL must satisfy the requirement of 
             latency upper bounds of all DetNet flows; therefore, those DetNet flows that traverse a 
-            network that uses this kind of shaper should have bounded latency, if the traffic and nodes are conformant.
+            network that uses this kind of shaper must have bounded latency, if the traffic and nodes are conformant.
         </t>
         <t>
-            It should be noted that scheduled traffic service relies on a synchronized
+            Note that scheduled traffic service relies on a synchronized
             network and coordinated GCL configuration. Synthesis of GCL on multiple
             nodes in network is a scheduling problem considering all DetNet flows
             traversing the network, which is a non-deterministic polynomial-time hard
@@ -751,7 +746,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
         
         <t>
             Each of the queuing subsystems for classes A and B, contains a Credit-Based Shaper (CBS). The CBS serves a packet from a class according to the available credit
-            for that class. As described in Section 8.6.8.2 of <xref target="IEEE8021Q"/>, the credit for each class A or B increases based on the idle slope (as guaranteed rate), and decreases based on the sendslope (typically equal to the difference between the guaranteed and the output link rates), both of which 
+            for that class. As described in Section 8.6.8.2 and Annex L.1 of <xref target="IEEE8021Q"/>, the credit for each class A or B increases based on the idle slope (as guaranteed rate), and decreases based on the sendslope (typically equal to the difference between the guaranteed and the output link rates), both of which 
             are parameters of the CBS. The CDT and BE0-BE4 flows are served by separate queuing subsystems. Then, packets from all flows are
             served by a transmission selection subsystem that serves packets from each class based on its priority. All subsystems are non-preemptive.
             Guarantees for AVB traffic can be provided only if CDT traffic is bounded; it is assumed that the CDT traffic has a leaky bucket arrival curve with two parameters r_h as rate and b_h as bucket size, i.e., the amount of bits entering a node within a time interval t is bounded by r_h * t + b_h. 
@@ -818,7 +813,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
 
         <section title="Flow Admission" anchor="admissionTSNwithATS">
             <t> 
-                The delay bound calculation requires some information about each node. For each node, it is required to know the idle slope of CBS for each class A and B (I_A and I_B), as well as the transmission rate of the output link (c). Besides, it is necessary to have the information on each class, i.e. maximum packet length of classes A, B, and BE. Moreover, the leaky bucket parameters of CDT (r_h,b_h) should be known. To admit a flow/flows of classes A and B, their delay requirements must be guaranteed not to be violated. As described in <xref target="flow-admission"/>, the two problems, static and dynamic, are addressed separately. In either of the problems, the rate and delay must be guaranteed. Thus,
+                The delay bound calculation requires some information about each node. For each node, it is required to know the idle slope of CBS for each class A and B (I_A and I_B), as well as the transmission rate of the output link (c). Besides, it is necessary to have the information on each class, i.e. maximum packet length of classes A, B, and BE. Moreover, the leaky bucket parameters of CDT (r_h,b_h) must be known. To admit a flow/flows of classes A and B, their delay requirements must be guaranteed not to be violated. As described in <xref target="flow-admission"/>, the two problems, static and dynamic, are addressed separately. In either of the problems, the rate and delay must be guaranteed. Thus,
             </t>
             <t>
                 <list hangIndent="8" style="hanging">
@@ -846,7 +841,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
                 </list>
             </t>
             <t>
-                The choice of the static values of R and b_t at all nodes and classes must be done in a prior configuration phase; R controls the bandwidth allocated to this class at this node, b_t affects the delay bound and the buffer requirement. R must satisfy the constraints given in Annex L.1 of <xref target="IEEE8021Q"/>.
+                The choice of the static values of R and b_t at all nodes and classes must be done in a prior configuration phase; R controls the bandwidth allocated to this class at this node, b_t affects the delay bound and the buffer requirement. The value of R must not be greater than R_X for class X={A,B}, that is computed in <xref target="delayTSNwithATS"/>.
             </t>
         </section>
         
@@ -880,7 +875,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
         In the case of two-buffer CQF, each class of DetNet flows c has two buffers, namely buffer1 and buffer2. In a cycle (i) when buffer1 accumulates received packets from the node's reception ports, buffer2 transmits the already stored packets from the previous cycle (i-1). In the next cycle (i+1), buffer2 stores the received packets and buffer1 transmits the packets received in cycle (i). The duration of each cycle is T_c.
      </t>
      <t>
-        The cycle time T_c should be carefully chosen; it needs to be large enough to accomodate all the DetNet traffic, plus at least one maximum packet (or fragment) size from lower priority queues, which might be received within a cycle. 
+        The cycle time T_c must be carefully chosen; it needs to be large enough to accomodate all the DetNet traffic, plus at least one maximum packet (or fragment) size from lower priority queues, which might be received within a cycle. 
         Also, the value of T_c includes a time interval, called dead time (DT), which is the sum of the delays 1,2,3,4 defined in <xref target="fig_timing_model"/>. The value of DT guarantees that the last packet of one cycle in a node is fully delivered to a buffer of the next node is the same cycle. A two-buffer CQF is recommended if DT is small compared to T_c. For a large DT, CQF with more buffers can be used and a cycle identification label can be added to the packets.
      </t>
      <t>
@@ -991,7 +986,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     </t>
 </section>
 <section title="Acknowledgement">
-    <t>We would like to thank Tony Przygienda and John Scudder for their invaluable feedback on this document.</t>
+    <t>We would like to thank Lou Berger, Tony Przygienda and John Scudder for their invaluable feedback on this document.</t>
 </section> 
 
 </middle>
