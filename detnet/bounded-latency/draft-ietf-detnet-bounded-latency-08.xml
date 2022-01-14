@@ -354,12 +354,10 @@
                     an arbitrary delay can result.</t>
                 <t hangText="4. Processing delay"><vspace blankLines="0"/>
                     This delay covers the time from the reception of the last bit of the packet to the
-                    time the packet is enqueued in the regulator, also known as shaper in <xref target="RFC2475"/>, (queuing subsystem, if there is no regulation).
+                    time the packet is enqueued in the regulator (queuing subsystem, if there is no regulation) as shown in <xref target="fig_timing_model"/>.
                     This delay can be variable, and depends on the details of the operation of the forwarding node.</t>
                 <t hangText="5. Regulator delay"><vspace blankLines="0"/>
-                    This is the time a packet is delayed by a regulator, also known as shaper in <xref target="RFC2475"/>; in other words, it is the time spent from the insertion of the last bit of a packet into a regulation queue until the time
-                    the packet is declared eligible according to its regulation constraints. We assume that 
-                    this time can be calculated based on the details of regulation policy. If there is no regulation, this time is zero.</t>
+                    A regulator, also known as shaper in <xref target="RFC2475"/>, delays some or all of the packets in a traffic stream in order to bring the stream into compliance with a regulation constraint. The regulator delay is the time spent from the insertion of the last bit of a packet into a regulation queue until the time the packet is declared eligible according to its regulation constraints. We assume that this time can be calculated based on the details of regulation policy. If there is no regulation, this time is zero.</t>
                 <t hangText="6. Queuing subsystem delay"><vspace blankLines="0"/>
                     This is the time spent for a packet from being declared eligible until being
                     selected for output on the next link.  We assume that this time is
@@ -369,7 +367,7 @@
             <t>Not shown in <xref target="fig_timing_model"/> are the other output queues that we
                 presume are also attached to that same output port as the queue shown, and against
                 which this shown queue competes for transmission opportunities.</t>
-            <t>In this analysis, the measurement is from the point a packet is selected for output in a node to the point it is selected for output in the next downstream node (that is the definition of a "hop").  In general,
+            <t>In this analysis, the measurement is from the point at which a packet is selected for output in a node to the point at which it is selected for output in the next downstream node (that is the definition of a "hop").  In general,
                 any queue selection method that is suitable for use in a DetNet network includes
                 a detailed specification as to exactly when packets are selected for transmission.
                 Any variations in any of the delay times 1-4 result in a need for additional
@@ -427,12 +425,12 @@
     <section title="Queuing delay bound" anchor="queuing">
     <t>
         For several queuing mechanisms, queuing_delay_bound is less than the sum of upper bounds on the queuing delays (5,6)
-        at every hop.  This occurs with (1) per-flow queuing, and (2) aggregate queuing with regulators, as explained in <xref target="perflow"/>, <xref target="perclass"/>, and <xref target="queue_model"/>.
+        at every hop.  This occurs with (1) per-flow queuing, and (2) aggregate queuing with regulators, as explained in <xref target="perflow"/>, <xref target="perclass"/>, and <xref target="queue_model"/>. For other queuing mechanisms the only available value of queuing_delay_bound
+        is the sum of the per-hop queuing delay bounds.
         </t>
     
-    <t>For other queuing mechanisms the only available value of queuing_delay_bound
-        is the sum of the per-hop queuing delay bounds.
-        In such cases, the computation of per-hop queuing delay bounds must account for the fact that the T-SPEC of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. The T-SPEC of a DetNet flow at the ingress of a hop can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has T-SPEC at source equal to 'alpha(t)' for any time period t, and the delay-jitter from source to the ingress of the hop is 'V'. Then, the T-SPEC at the ingress of the hop is 'alpha(t+V)'. For example, consider a DetNet flow with leaky bucket T-SPEC at source with rate r and bucket size b, i.e., alpha(t)=r * t+ b, t>0; alpha(0)=0; then the T-SPEC at the ingress of the hop is r * t + b + r * V, implying that the burstiness is increased by r*V.
+    <t>
+        The computation of per-hop queuing delay bounds must account for the fact that the T-SPEC of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. If regulators are used, the T-SPEC of a DetNet flow at the entrance of the queuing subsystem is recreated as the source T-SPEC; otherwise, the T-SPEC of the flow can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has T-SPEC at source equal to 'alpha(t)' for any time period t, and the delay-jitter from source to the ingress of the hop is 'V'. Then, the T-SPEC at the ingress of the hop is 'alpha(t+V)'. For example, consider a DetNet flow with leaky bucket T-SPEC at source with rate r and bucket size b, i.e., alpha(t)=r * t+ b, t>0; alpha(0)=0; then the T-SPEC at the ingress of the hop is r * t + b + r * V, implying that the burstiness is increased by r*V.
     </t>
     <section title="Per-flow queuing mechanisms" anchor="perflow">
         <t>
@@ -841,7 +839,14 @@ its (flow) regulation constraints; it is released at the earliest time at which 
                 </list>
             </t>
             <t>
-                The choice of the static values of R and b_t at all nodes and classes must be done in a prior configuration phase; R controls the bandwidth allocated to this class at this node, b_t affects the delay bound and the buffer requirement. The value of R must not be greater than R_X for class X={A,B}, that is computed in <xref target="delayTSNwithATS"/>.
+                The choice of the static values of R and b_t at all nodes and classes must be done in a prior configuration phase; R controls the bandwidth allocated to this class at this node, b_t affects the delay bound and the buffer requirement. The value of R must be set such that
+            </t>
+            <t><list style="hanging">
+                <t>R &lt;= I_X*(c-r_h)/c</t>
+            </list></t>
+            <t>
+                where I_X is the idleslope of credit-based shaper for class X={A,B}, c is the transmission rate of the output link and r_h is the leaky-bucket rate of the CDT class.
+                <!-- must not be greater than R_X for class X={A,B}, that is computed in <xref target="delayTSNwithATS"/>. -->
             </t>
         </section>
         
@@ -879,7 +884,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
         Also, the value of T_c includes a time interval, called dead time (DT), which is the sum of the delays 1,2,3,4 defined in <xref target="fig_timing_model"/>. The value of DT guarantees that the last packet of one cycle in a node is fully delivered to a buffer of the next node is the same cycle. A two-buffer CQF is recommended if DT is small compared to T_c. For a large DT, CQF with more buffers can be used and a cycle identification label can be added to the packets.
      </t>
      <t>
-        The per-hop latency is trivially determined by the cycle time T_c: a packet transmitted from a node at a cycle (i), is transmitted from the next node at cycle (i+1). Then, if the packet traverses h hops, the maximum latency experienced by the packet is from 
+        The per-hop latency is determined by the cycle time T_c: a packet transmitted from a node at a cycle (i), is transmitted from the next node at cycle (i+1). Then, if the packet traverses h hops, the maximum latency experienced by the packet is from 
          the beginning of cycle (i) to the end of cycle (i+h); also, the minimum latency is from the end of cycle (i) before the DT, to the beginning of cycle (i+h). Then, the maximum latency is:
         <list style="hanging">
             <t>(h+1) T_c</t>
@@ -986,7 +991,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     </t>
 </section>
 <section title="Acknowledgement">
-    <t>We would like to thank Lou Berger, Tony Przygienda and John Scudder for their invaluable feedback on this document.</t>
+    <t>We would like to thank Lou Berger, Tony Przygienda and John Scudder for their useful feedback on this document.</t>
 </section> 
 
 </middle>
