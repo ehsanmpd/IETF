@@ -185,7 +185,17 @@
 
 <section title="Terminology and Definitions">
     <t>
-    This document uses the terms defined in <xref target="RFC8655"/>.
+    This document uses the terms defined in <xref target="RFC8655"/>. Moreover, the following terms are used in this document:
+    </t>
+    <t>
+       <list style="hanging">
+            <t hangText="T-SPEC"><vspace blankLines="0"/>
+                  TrafficSpecification as defined in Section 5.5 of <xref target="RFC9016"/>.
+            </t>
+            <t hangText="arrival curve"><vspace blankLines="0"/>
+                An arrival curve function alpha(t) is an upper bound on the number of bits seen at an observation point within any time interval t.
+            </t>
+        </list> 
     </t>
     
 </section>
@@ -354,10 +364,10 @@
                     an arbitrary delay can result.</t>
                 <t hangText="4. Processing delay"><vspace blankLines="0"/>
                     This delay covers the time from the reception of the last bit of the packet to the
-                    time the packet is enqueued in the regulator (queuing subsystem, if there is no regulation) as shown in <xref target="fig_timing_model"/>.
+                    time the packet is enqueued in the regulator (queuing subsystem, if there is no regulator) as shown in <xref target="fig_timing_model"/>.
                     This delay can be variable, and depends on the details of the operation of the forwarding node.</t>
                 <t hangText="5. Regulator delay"><vspace blankLines="0"/>
-                    A regulator, also known as shaper in <xref target="RFC2475"/>, delays some or all of the packets in a traffic stream in order to bring the stream into compliance with a regulation constraint. The regulator delay is the time spent from the insertion of the last bit of a packet into a regulation queue until the time the packet is declared eligible according to its regulation constraints. We assume that this time can be calculated based on the details of regulation policy. If there is no regulation, this time is zero.</t>
+                    A regulator, also known as shaper in <xref target="RFC2475"/>, delays some or all of the packets in a traffic stream in order to bring the stream into compliance with an arrival curve; an arrival curve 'alpha(t)' is an upper bound on the number of bits observed within any interval t. The regulator delay is the time spent from the insertion of the last bit of a packet into a regulation queue until the time the packet is declared eligible according to its regulation constraints. We assume that this time can be calculated based on the details of regulation policy. If there is no regulation, this time is zero.</t>
                 <t hangText="6. Queuing subsystem delay"><vspace blankLines="0"/>
                     This is the time spent for a packet from being declared eligible until being
                     selected for output on the next link.  We assume that this time is
@@ -416,9 +426,9 @@
     <t>
         Second, compute queuing_delay_bound as an upper bound to the sum of the
         queuing delays along the path. The value of queuing_delay_bound depends
-        on the T-SPEC of this DetNet flow and possibly
+        on the information on the arrival curve of this DetNet flow and possibly
         of other flows in the network, as well as the specifics of the queuing
-        mechanisms deployed along the path of this DetNet flow. The computation of queuing_delay_bound 
+        mechanisms deployed along the path of this DetNet flow. Note that arrival curve of DetNet flow at source is immediately specified by the T-SPEC of this flow. The computation of queuing_delay_bound 
         is described in <xref target="queuing"/> as a separate section.
     </t>
     </section>
@@ -430,7 +440,23 @@
         </t>
     
     <t>
-        The computation of per-hop queuing delay bounds must account for the fact that the T-SPEC of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. If regulators are used, the T-SPEC of a DetNet flow at the entrance of the queuing subsystem is recreated as the source T-SPEC; otherwise, the T-SPEC of the flow can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has T-SPEC at source equal to 'alpha(t)' for any time period t, and the delay-jitter from source to the ingress of the hop is 'V'. Then, the T-SPEC at the ingress of the hop is 'alpha(t+V)'. For example, consider a DetNet flow with leaky bucket T-SPEC at source with rate r and bucket size b, i.e., alpha(t)=r * t+ b, t>0; alpha(0)=0; then the T-SPEC at the ingress of the hop is r * t + b + r * V, implying that the burstiness is increased by r*V.
+        The computation of per-hop queuing delay bounds must account for the fact that the arrival curve of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. If regulators are used, the arrival curve of a DetNet flow at the entrance of the queuing subsystem is the same as the source arrival curve; otherwise, an arrival curve of the flow can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has arrival curve at source equal to 'alpha(t)', and the delay-jitter from source to the ingress of the hop is 'V'. Then, the arrival curve at the ingress of the hop is 'alpha(t+V)'. 
+    </t>
+    <t>
+        For example, consider a DetNet flow with T-SPEC "Interval: tau, MaxPacketsPerInterval: K, MaxPacketSize: L" at source. Then, a leaky-bucket arrival curve for such flow at source is alpha(t)=r * t+ b, t>0; alpha(0)=0, where r is the rate and b is the bucket size, computed as
+    </t>
+    <t>
+        <list style="hanging">
+           <t> 
+                r =  (K * L) / tau,
+           </t>
+           <t>
+                b = K * L.
+           </t>
+         </list>
+    </t>
+    <t> 
+        Now, if the flow has delay-jitter of 'V' from source to the ingress of a hop, an arrival curve at this point is r * t + b + r * V, implying that the burstiness is increased by r*V. A more detail information on arrival curves is available in <xref target="NetCalBook"/>.
     </t>
     <section title="Per-flow queuing mechanisms" anchor="perflow">
         <t>
@@ -574,7 +600,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
  
  
  <section anchor="queue_model" title="Queuing techniques">
-    <t>In this section, for simplicity of delay bound computation, we assume that the T-SPEC or arrival curve <xref target="NetCalBook"/> for each DetNet flow at source is leaky bucket.
+    <t>In this section, for simplicity of delay bound computation, we assume leaky-bucket arrival curve for each DetNet flow at source.
      Also, at each Detnet transit node, the service for each queue is abstracted with a minimum guaranteed rate and a latency <xref target="NetCalBook"/>.</t>
     <section anchor="data_model" title="Queuing data model">
 
