@@ -120,7 +120,7 @@
    </address>
 </author>
 
-<date month="January" day="15" year="2022" />
+<date month="January" day="24" year="2022" />
 
 <area>Routing</area>
 
@@ -440,7 +440,7 @@
         </t>
     
     <t>
-        The computation of per-hop queuing delay bounds must account for the fact that the arrival curve of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. If regulators are used, the arrival curve of a DetNet flow at the entrance of the queuing subsystem is the same as the source arrival curve; otherwise, an arrival curve of the flow can be derived using the delay-jitter of the flow from its source to the ingress of the hop; more formally, assume a DetNet flow has arrival curve at source equal to 'alpha(t)', and the delay-jitter from source to the ingress of the hop is 'V'. Then, the arrival curve at the ingress of the hop is 'alpha(t+V)'. 
+        The computation of per-hop queuing delay bounds must account for the fact that the arrival curve of a DetNet flow is no longer satisfied at the ingress of a hop, since burstiness increases as one flow traverses one DetNet transit node. If a regulator is placed at a hop, an arrival curve of a DetNet flow at the entrance of the queuing subsystem of this hop is the one configured at the regulator (also called shaping curve in <xref target="NetCalBook"/>); otherwise, an arrival curve of the flow can be derived using the delay-jitter of the flow from the last regulation point (the last regulator in the path of the flow if there is any, otherwise the source of the flow) to the ingress of the hop; more formally, assume a DetNet flow has arrival curve at the last regulation point equal to 'alpha(t)', and the delay-jitter from the last regulation point to the ingress of the hop is 'V'. Then, the arrival curve at the ingress of the hop is 'alpha(t+V)'. 
     </t>
     <t>
         For example, consider a DetNet flow with T-SPEC "Interval: tau, MaxPacketsPerInterval: K, MaxPacketSize: L" at source. Then, a leaky-bucket arrival curve for such flow at source is alpha(t)=r * t+ b, t>0; alpha(0)=0, where r is the rate and b is the bucket size, computed as
@@ -456,7 +456,7 @@
          </list>
     </t>
     <t> 
-        Now, if the flow has delay-jitter of 'V' from source to the ingress of a hop, an arrival curve at this point is r * t + b + r * V, implying that the burstiness is increased by r*V. A more detail information on arrival curves is available in <xref target="NetCalBook"/>.
+        Now, if the flow has delay-jitter of 'V' from the last regulation point to the ingress of a hop, an arrival curve at this point is r * t + b + r * V, implying that the burstiness is increased by r*V. A more detail information on arrival curves is available in <xref target="NetCalBook"/>.
     </t>
     <section title="Per-flow queuing mechanisms" anchor="perflow">
         <t>
