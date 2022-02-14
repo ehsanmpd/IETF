@@ -120,7 +120,7 @@
    </address>
 </author>
 
-<date month="February" day="15" year="2022" />
+<date month="February" day="16" year="2022" />
 
 <area>Routing</area>
 
@@ -129,9 +129,12 @@
 <keyword>DetNet, bounded latency, zero congestion loss</keyword>
 
 <abstract>
+    <!-- <t>
+        This document presents a timing model for sources, destinations, and the DetNet transit nodes. Using the model, it provides a methodology to compute end-to-end latency and backlog bounds for various queuing mechanisms which can be used by the management and control planes to provide DetNet qualities of service. Hence, it is possible for an implementer, user, or standards development organization to select a set of queuing mechanisms for each device in a DetNet network, and to select a resource reservation algorithm for that network, so that those elements can work together to provide the DetNet service.
+         
+    </t> -->
     <t>
-        This document presents a timing model for sources, destinations, and the DetNet transit nodes. Using the model, it provides a methodology to compute end-to-end delay backlog bounds for various queuing mechanisms which can be used by the management and control planes to provide DetNet QoS. Hence, it is possible for an implementer, user, or standards development organization to select a set of queuing mechanisms for each device in a DetNet network, and to select a resource reservation algorithm for that network, so that those elements can work together to provide the DetNet service.
-         <!-- Finally, this document references a number of queuing mechanisms, defined in other documents, that can be used to control packet transmission at each output port and achieve the DetNet qualities of service.  -->
+        This document presents a timing model for sources, destinations, and DetNet transit nodes. Using the model, it provides a methodology to compute end-to-end latency and backlog bounds for various queuing methods. The methodology can be used by the management and control planes and by resource reservation algorithms to provide bounded latency and zero congestion loss for the DetNet service. 
     </t>
 </abstract>
 </front>
@@ -144,7 +147,7 @@
 <section title="Introduction">
     
     <t>The ability for IETF Deterministic Networking (DetNet) or IEEE 802.1 Time-Sensitive
-        Networking (TSN, <xref target="IEEE8021TSN"/>) to provide the DetNet services of bounded latency and zero congestion
+        Networking <xref target="IEEE8021TSN"/> to provide the DetNet services of bounded latency and zero congestion
         loss depends upon A) configuring and allocating network resources for the exclusive
         use of DetNet flows; B) identifying, in the data plane, the
         resources to be utilized by any given packet, and C) the detailed behavior
@@ -159,7 +162,7 @@
         in turn, provides the opportunity for the network to supply enough buffer
         space to guarantee zero congestion loss.
         It is assumed in this document that the paths of DetNet flows are fixed. Before the transmission of a DetNet flow, it is possible to calculate 
-        end-to-end latency bounds and the amount of buffer space required at each hop to ensure zero congestion loss that can be used by the applications identified in <xref target="RFC8578"/>.
+        end-to-end latency bounds and the amount of buffer space required at each hop to ensure zero congestion loss; this can be used by the applications identified in <xref target="RFC8578"/>.
     </t>
 <!--     <t>
         To be used by the applications identified in
@@ -170,7 +173,7 @@
     </t> -->
     <t>
         This document presents a timing model for sources, destinations, and the
-        DetNet transit nodes; using this model, it furthermore provides a methodology to compute end-to-end latency and backlog bounds for various queuing mechanisms that can be used by the management and control planes to provide DetNet QoS. The methodology used in this document covers both cases of presence and absence of packet reordering within a DetNet node. The bounds on the amount of packet reordering is out of the scope of this document and can be found in <xref target="PacketReorderingBounds"/>. Moreover, this document references specific queuing mechanisms, mentioned in <xref target="RFC8655"/>, as proofs of concept that can be used to control packet transmission at each output port and achieve the DetNet qualities of service. 
+        DetNet transit nodes; using this model, it provides a methodology to compute end-to-end latency and backlog bounds for various queuing mechanisms that can be used by the management and control planes to provide DetNet qualities of service. The methodology used in this document account for the possibility of packet reordering within a DetNet node. The bounds on the amount of packet reordering is out of the scope of this document and can be found in <xref target="PacketReorderingBounds"/>. Moreover, this document references specific queuing mechanisms, mentioned in <xref target="RFC8655"/>, as proofs of concept that can be used to control packet transmission at each output port and achieve the DetNet quality of service. 
     </t><t>
         Using the model presented in this document, it is possible for an
         implementer, user, or standards development organization to select
@@ -474,11 +477,11 @@
          </list>
     </t>
     <t> 
-        where L' is the size of any added networking technology-specific encapsulation (e.g., MPLS label(s), UDP, and IP headers). Now, if the flow has delay-jitter of 'V' from the last regulation point to the ingress of a hop, an arrival curve at this point is r * t + b + r * V, implying that the burstiness is increased by r*V. A more detail information on arrival curves is available in <xref target="NetCalBook"/>.
+        where L' is the size of any added networking technology-specific encapsulation (e.g., MPLS label(s), UDP, and IP headers). Now, if the flow has delay-jitter of 'V' from the last regulation point to the ingress of a hop, an arrival curve at this point is r * t + b + r * V, implying that the burstiness is increased by r*V. A more detailed information on arrival curves is available in <xref target="NetCalBook"/>.
     </t>
     <section title="Per-flow queuing mechanisms" anchor="perflow">
         <t>
-            With such mechanisms, each flow uses a separate queue inside every node. The service for each queue is abstracted with a guaranteed rate and a latency. For every DetNet flow, a per-node latency bound as well as an end-to-end latency bound can be computed from the traffic specification of this DetNet flow at its source and from the values of rates and latencies at all nodes along its path. An instance of per-flow queuing is in Guaranteed-Service IntServ of which the details of latency bound calculation are presented in <xref target="intserv"/>.
+            With such mechanisms, each flow uses a separate queue inside every node. The service for each queue is abstracted with a guaranteed rate and a latency. For every DetNet flow, a per-node latency bound as well as an end-to-end latency bound can be computed from the traffic specification of this DetNet flow at its source and from the values of rates and latencies at all nodes along its path. An instance of per-flow queuing is IntServ's Guaranteed-Service, for which the details of latency bound calculation are presented in <xref target="intserv"/>.
         </t>
     </section>
 
@@ -488,7 +491,7 @@
             </t>
             <t>
                 A solution to deal with this issue for the DetNet flows is to reshape them at every hop. This can be done with per-flow regulators (e.g. leaky bucket shapers), but this requires per-flow queuing and defeats the purpose of aggregate queuing. An alternative is the interleaved regulator, which reshapes individual DetNet flows without per-flow queuing (<xref target="SpechtUBS"/>, <xref target="IEEE8021Qcr"/>). With  an interleaved regulator, the packet at the head of the queue is regulated based on
-its (flow) regulation constraints; it is released at the earliest time at which this is possible without violating the constraint. One key feature of per-flow or interleaved regulator is that, it does not increase worst-case latency bounds <xref target="LeBoudecTheory"/>. Specifically, when an interleaved regulator is appended to a FIFO subsystem, it does not increase the worst-case delay of the latter; in <xref target="fig_timing_model"/>, when the order of packets from output of queuing subsystem at node A to the entrance of regulator at node B is preserved, then the regulator does not increase the worst-case latency bounds; this is made possible if all the systems are FIFO or a DetNet packet-ordering function (POF) is implemented just before the regulator. This property does not hold if packet reordering occurs from the output of a queuing subsystem to the entrance of next downstream interleaved regulator, e.g. at a switching fabric.
+its (flow) regulation constraints; it is released at the earliest time at which this is possible without violating the constraint. One key feature of per-flow or interleaved regulator is that, it does not increase worst-case latency bounds <xref target="LeBoudecTheory"/>. Specifically, when an interleaved regulator is appended to a FIFO subsystem, it does not increase the worst-case delay of the latter; in <xref target="fig_timing_model"/>, when the order of packets from output of queuing subsystem at node A to the entrance of regulator at node B is preserved, then the regulator does not increase the worst-case latency bounds; this is made possible if all the systems are FIFO or a DetNet packet-ordering function (POF) is implemented just before the regulator. This property does not hold if packet reordering occurs from the output of a queuing subsystem to the entrance of next downstream interleaved regulator, e.g. at a non-FIFO switching fabric.
             </t>
             <t>
                 <xref target="fig_detnet_e2e_example"/> shows an example of a network with 5 nodes, aggregate queuing mechanism and interleaved regulators as in <xref target="fig_timing_model"/>. 
@@ -517,8 +520,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
 ]]></artwork>
             </figure>
             <t>
-                REMARK: If packet reordering does not occur, the end-to-end latency bound calculation provided here gives a tighter upper latency bound in comparison with end-to-end latency bound 
-                computation by adding the latency bounds of each node in the path of a DetNet flow <xref target="TSNwithATS"/>.
+                REMARK: If packet reordering does not occur, the end-to-end latency bound calculation provided here gives a tighter latency upper-bound than would be obtained by adding the latency bounds of each node in the path of a DetNet flow <xref target="TSNwithATS"/>.
             </t>
         </section>
     </section>
@@ -746,8 +748,8 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     </section>
     <section anchor="TSNwithATSmodel" title="Credit-Based Shaper with Asynchronous Traffic Shaping">
         <t>
-            In the queuing model, it is assumed that the DetNet nodes are FIFO. We consider the four traffic classes (Definition 3.268 of <xref target="IEEE8021Q"/>): control-data traffic (CDT),
-            class A, class B, and best effort (BE) in decreasing order of priority. Flows of classes A and B can be, but not limited to, audio and video traffic (as in IEEE 802.1BA Audio-Video-Bridging). This model is a subset of Time-Sensitive Networking as described next.
+            In this queuing model, it is assumed that the DetNet nodes are FIFO. We consider the four traffic classes (Definition 3.268 of <xref target="IEEE8021Q"/>): control-data traffic (CDT),
+            class A, class B, and best effort (BE) in decreasing order of priority. Flows of classes A and B are time-sensitive flows that are less critical than CDT (such as e.g. studio audio and video traffic, as in IEEE 802.1BA Audio-Video-Bridging). This model is a subset of Time-Sensitive Networking as described next.
         </t>
         <t>
             Based on the timing model described in <xref target="fig_timing_model"/>, contention occurs only at the output port of a DetNet transit node; therefore, the focus of the rest of this subsection is on the regulator and queuing subsystem in the output port of a DetNet transit node. The input flows are identified using the information in (Section 5.1 of <xref target="RFC8939"/>). Then they are aggregated into eight macro flows based
