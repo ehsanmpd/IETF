@@ -107,20 +107,7 @@
    </address>
 </author>
 
-<author fullname="J&aacute;nos Farkas" initials="J." surname="Farkas">
-   <organization>Ericsson</organization>
-   <address>
-      <postal>
-         <street>Konyves K&aacute;lm&aacute;n krt. 11/B</street>
-         <city>Budapest</city>
-         <country>Hungary</country>
-         <code>1097</code>
-      </postal>
-      <email>janos.farkas@ericsson.com</email>
-   </address>
-</author>
-
-<date month="April" day="10" year="2022" />
+<date month="April" day="6" year="2022" />
 
 <area>Routing</area>
 
@@ -148,17 +135,26 @@
     
     <t>The ability for IETF Deterministic Networking (DetNet) or IEEE 802.1 Time-Sensitive
         Networking <xref target="IEEE8021TSN"/> to provide the DetNet services of bounded latency and zero congestion
-        loss depends upon A) configuring and allocating network resources for the exclusive
-        use of DetNet flows; B) identifying, in the data plane, the
-        resources to be utilized by any given packet, and C) the detailed behavior
-        of those resources, especially transmission queue selection, so that
-        latency bounds can be reliably assured.
+        loss depends upon </t>
+    <t>
+        <list style="hanging">
+            <t> A) configuring and allocating network resources for the exclusive use of DetNet flows; </t>
+            <t> B) identifying, in the data plane, the resources to be utilized by any given packet;</t>
+            <t> C) the detailed behavior of those resources, especially transmission queue selection, so that latency bounds can be reliably assured.
+            </t>
+        </list>
     </t>
     <t>
         As explained in <xref target="RFC8655"/>, DetNet
-        flows are notably characterized by 1) a maximum bandwidth, guaranteed either by the
-        transmitter or by strict input metering; and 2) a requirement for a
-        guaranteed worst-case end-to-end latency.  That latency guarantee,
+        flows are notably characterized by 
+    </t>
+    <t>
+        <list style="numbers">
+            <t>a maximum bandwidth, guaranteed either by the transmitter or by strict input metering; </t>
+            <t>a requirement for a guaranteed worst-case end-to-end latency.</t>
+        </list>
+    </t>
+        <t>  That latency guarantee,
         in turn, provides the opportunity for the network to supply enough buffer
         space to guarantee zero congestion loss.
         It is assumed in this document that the paths of DetNet flows are fixed. Before the transmission of a DetNet flow, it is possible to calculate 
@@ -182,7 +178,7 @@
         those elements can work together to provide the DetNet service. <xref target="example"/> provides an example application of the timing model introduced in this document on a DetNet IP network with a combination of different queuing mechanisms.
     </t><t>
         This document does not specify any resource reservation protocol or control plane function.
-        It disregards the in-band packets that can be part of the stream such as OAM and necessary re-transmissions.
+        <!-- It disregards the in-band packets that can be part of the stream such as OAM and necessary re-transmissions. -->
         It does not describe all of the requirements for that protocol or control plane function.
         It does describe requirements for such resource reservation methods,
         and for queuing mechanisms that, if met, will enable them to work together.
@@ -323,9 +319,9 @@
             </t>
             <t>
                 The choice of queuing methods is critical to the applicability of the
-                dynamic calculation.  Some queuing methods (e.g. CQF, <xref target="cqf"/>) make
+                dynamic calculation.  Some queuing methods (e.g., CQF, <xref target="cqf"/>) make
                 it easy to configure bounds on the network's capacity, and to make
-                independent calculations for each DetNet flow. Some other queuing methods (e.g. strict priority with the credit-based shaper
+                independent calculations for each DetNet flow. Some other queuing methods (e.g., strict priority with the credit-based shaper
                 defined in <xref target="IEEE8021Q"/> section 8.6.8.2) can be used for dynamic DetNet flow creation,
                 but yield poorer latency and buffer space guarantees than when that same
                 queuing method is used for static DetNet flow creation
@@ -358,7 +354,7 @@
             </figure>
             <t>In <xref target="fig_timing_model"/>, we see two DetNet transit nodes that are connected via a link. In this model, the only queues, that we deal
                 with explicitly, are attached to the output port; other queues are modeled as variations
-                in the other delay times.  (E.g., an input queue could be modeled as either a variation
+                in the other delay times (e.g., an input queue could be modeled as either a variation
                 in the link delay (2) or the processing delay (4).)  There are six delays that a packet
                 can experience from hop to hop.</t>
             <t><list style="hanging">
@@ -381,7 +377,7 @@
                     a virtual "link" could exhibit a variable link delay.</t>
                 <t hangText="3. Frame preemption delay"><vspace blankLines="0"/>
                     If the packet is interrupted in order to transmit another packet or packets,
-                    (e.g. <xref target="IEEE8023"/> clause 99 frame preemption)
+                    (e.g., <xref target="IEEE8023"/> clause 99 frame preemption)
                     an arbitrary delay can result.</t>
                 <t hangText="4. Processing delay"><vspace blankLines="0"/>
                     This delay covers the time from the reception of the last bit of the packet to the
@@ -490,8 +486,8 @@
                 With such mechanisms, multiple flows are aggregated into macro-flows and there is one FIFO queue per macro-flow. A practical example is the credit-based shaper defined in section 8.6.8.2 of <xref target="IEEE8021Q"/> where a macro-flow is called a "class".  One key issue in this context is how to deal with the burstiness cascade: individual flows that share a resource dedicated to a macro-flow may see their burstiness increase, which may in turn cause increased burstiness to other flows downstream of this resource. Computing delay upper bounds for such cases is difficult, and in some conditions impossible <xref target="CharnyDelay"/><xref target="BennettDelay"/>. Also, when bounds are obtained, they depend on the complete configuration, and must be recomputed when one flow is added. (The dynamic calculation, <xref target="dynamic-calculation"/>.)
             </t>
             <t>
-                A solution to deal with this issue for the DetNet flows is to reshape them at every hop. This can be done with per-flow regulators (e.g. leaky bucket shapers), but this requires per-flow queuing and defeats the purpose of aggregate queuing. An alternative is the interleaved regulator, which reshapes individual DetNet flows without per-flow queuing (<xref target="SpechtUBS"/>, <xref target="IEEE8021Qcr"/>). With  an interleaved regulator, the packet at the head of the queue is regulated based on
-its (flow) regulation constraints; it is released at the earliest time at which this is possible without violating the constraint. One key feature of per-flow or interleaved regulator is that, it does not increase worst-case latency bounds <xref target="LeBoudecTheory"/>. Specifically, when an interleaved regulator is appended to a FIFO subsystem, it does not increase the worst-case delay of the latter; in <xref target="fig_timing_model"/>, when the order of packets from output of queuing subsystem at node A to the entrance of regulator at node B is preserved, then the regulator does not increase the worst-case latency bounds; this is made possible if all the systems are FIFO or a DetNet packet-ordering function (POF) is implemented just before the regulator. This property does not hold if packet reordering occurs from the output of a queuing subsystem to the entrance of next downstream interleaved regulator, e.g. at a non-FIFO switching fabric.
+                A solution to deal with this issue for the DetNet flows is to reshape them at every hop. This can be done with per-flow regulators (e.g., leaky bucket shapers), but this requires per-flow queuing and defeats the purpose of aggregate queuing. An alternative is the interleaved regulator, which reshapes individual DetNet flows without per-flow queuing (<xref target="SpechtUBS"/>, <xref target="IEEE8021Qcr"/>). With  an interleaved regulator, the packet at the head of the queue is regulated based on
+its (flow) regulation constraints; it is released at the earliest time at which this is possible without violating the constraint. One key feature of per-flow or interleaved regulator is that, it does not increase worst-case latency bounds <xref target="LeBoudecTheory"/>. Specifically, when an interleaved regulator is appended to a FIFO subsystem, it does not increase the worst-case delay of the latter; in <xref target="fig_timing_model"/>, when the order of packets from output of queuing subsystem at node A to the entrance of regulator at node B is preserved, then the regulator does not increase the worst-case latency bounds; this is made possible if all the systems are FIFO or a DetNet packet-ordering function (POF) is implemented just before the regulator. This property does not hold if packet reordering occurs from the output of a queuing subsystem to the entrance of next downstream interleaved regulator, e.g., at a non-FIFO switching fabric.
             </t>
             <t>
                 <xref target="fig_detnet_e2e_example"/> shows an example of a network with 5 nodes, aggregate queuing mechanism and interleaved regulators as in <xref target="fig_timing_model"/>. 
@@ -597,7 +593,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     <t>Let 
     <list style="symbols">
     <t> total_in_rate be the sum of the line rates of all input ports that send traffic to this output port. The value of total_in_rate
-    is in data units (e.g. bytes) per second. 
+    is in data units (e.g., bytes) per second. 
     </t>
     <t>nb_input_ports be the number input ports that send traffic to this output port</t>
     <t>max_packet_length be the maximum packet size for packets that may be sent to this output port. This is counted in data units.
@@ -686,8 +682,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
         bridge <xref target="IEEE8021Q"/>, since the
         introduction of per-stream filtering and policing (<xref target="IEEE8021Q"/> clause 8.6.5.1).
         In addition to the Layer 2 priority
-        expressed in the 802.1Q VLAN tag, a DetNet transit node can utilize any of the following
-        information to assign a packet to a particular queue:
+        expressed in the 802.1Q VLAN tag, a DetNet transit node can utilize the information from the non-exhaustive list below to assign a packet to a particular queue:
         <list style="symbols">
             <t>
                 Input port.
@@ -725,7 +720,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     </t>    
     </section>
 
-    <section anchor="time_schedule_intro" title="Time Aware Shaper">
+    <section anchor="time_schedule_intro" title="Time-Aware Shaper">
         <t>
             In <xref target="IEEE8021Q"/>, the notion of time-scheduling queue gates is
             described in section 8.6.8.4. On each node, the transmission selection for packets 
@@ -795,7 +790,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
             Guarantees for classes A and B traffic can be provided only if CDT traffic is bounded; it is assumed that the CDT traffic has a leaky bucket arrival curve with two parameters r_h as rate and b_h as bucket size, i.e., the amount of bits entering a node within a time interval t is bounded by r_h * t + b_h. 
         </t>
         <t>
-            Additionally, it is assumed that the classes A and B flows are also regulated at their source according to a leaky bucket arrival curve. At the source, the traffic satisfies its regulation constraint, i.e. the delay due to interleaved regulator at the source is ignored.
+            Additionally, it is assumed that the classes A and B flows are also regulated at their source according to a leaky bucket arrival curve. At the source, the traffic satisfies its regulation constraint, i.e., the delay due to interleaved regulator at the source is ignored.
         </t>
         <t>
             At each DetNet transit node implementing an interleaved regulator, packets of multiple flows are processed in one FIFO queue; the packet at the head
@@ -856,7 +851,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
 
         <section title="Flow Admission" anchor="admissionTSNwithATS">
             <t> 
-                The delay bound calculation requires some information about each node. For each node, it is required to know the idle slope of CBS for each class A and B (I_A and I_B), as well as the transmission rate of the output link (c). Besides, it is necessary to have the information on each class, i.e. maximum packet length of classes A, B, and BE. Moreover, the leaky bucket parameters of CDT (r_h,b_h) must be known. To admit a flow/flows of classes A and B, their delay requirements must be guaranteed not to be violated. As described in <xref target="flow-admission"/>, the two problems, static and dynamic, are addressed separately. In either of the problems, the rate and delay must be guaranteed. Thus,
+                The delay bound calculation requires some information about each node. For each node, it is required to know the idle slope of CBS for each class A and B (I_A and I_B), as well as the transmission rate of the output link (c). Besides, it is necessary to have the information on each class, i.e., maximum packet length of classes A, B, and BE. Moreover, the leaky bucket parameters of CDT (r_h,b_h) must be known. To admit a flow/flows of classes A and B, their delay requirements must be guaranteed not to be violated. As described in <xref target="flow-admission"/>, the two problems, static and dynamic, are addressed separately. In either of the problems, the rate and delay must be guaranteed. Thus,
             </t>
             <t>
                 <list hangIndent="8" style="hanging">
@@ -907,7 +902,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
             Consider a Guaranteed-Service IntServ path including a sequence of nodes, where the i-th node  provides a guaranteed rate R_i and maximum service latency of T_i. Then, the end-to-end delay bound for a flow on this can be calculated as sum(T_i) + b / min(R_i).
         </t>
         <t>
-            The provided delay bound is based on a simple case of Guaranteed-Service IntServ where only a guaranteed rate and maximum service latency and a leaky bucket arrival curve are available. If more information about the flow is known, e.g. the peak rate, the delay bound is more complicated; the details are available in <xref target="RFC2212"/> and Section 1.4.1 of <xref target="NetCalBook"/>.
+            The provided delay bound is based on a simple case of Guaranteed-Service IntServ where only a guaranteed rate and maximum service latency and a leaky bucket arrival curve are available. If more information about the flow is known, e.g., the peak rate, the delay bound is more complicated; the details are available in <xref target="RFC2212"/> and Section 1.4.1 of <xref target="NetCalBook"/>.
         </t>    
     </section>
   <section title="Cyclic Queuing and Forwarding" anchor="cqf">
@@ -926,7 +921,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
      </t>
      <t>
         The cycle time T_c must be carefully chosen; it needs to be large enough to accommodate all the DetNet traffic, plus at least one maximum packet (or fragment) size from lower priority queues, which might be received within a cycle. 
-        Also, the value of T_c includes a time interval, called dead time (DT), which is the sum of the delays 1,2,3,4 defined in <xref target="fig_timing_model"/>. The value of DT guarantees that the last packet of one cycle in a node is fully delivered to a buffer of the next node in the same cycle. A two-buffer CQF is recommended if DT is small compared to T_c. For a large DT, CQF with more buffers can be used and a cycle identification label can be added to the packets.
+        Also, the value of T_c includes a time interval, called dead time (DT), which is the sum of the delays 1,2,3,4 defined in <xref target="fig_timing_model"/>. The value of DT guarantees that the last packet of one cycle in a node is fully delivered to a buffer of the next node in the same cycle. A two-buffer CQF is recommended if DT is small compared to T_c. For a large DT, CQF with more buffers can be used, and a cycle identification label can be added to the packets.
      </t>
      <t>
         The per-hop latency is determined by the cycle time T_c: a packet transmitted from a node at a cycle (i), is transmitted from the next node at cycle (i+1). Then, if the packet traverses h hops, the maximum latency experienced by the packet is from 
@@ -1046,8 +1041,19 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     This document has no IANA actions.
     </t>
 </section>
+
 <section title="Acknowledgement">
-    <t>We would like to thank Lou Berger, Tony Przygienda, John Scudder, Watson Ladd, Yoshifumi Nishida, Ralf Weber, Robert Sparks, Martin Duke, and &Eacute;ric Vyncke for their useful feedback on this document.</t>
+    <t>We would like to thank Lou Berger, Tony Przygienda, John Scudder, Watson Ladd, Yoshifumi Nishida, Ralf Weber, Robert Sparks, Gyan Mishra, Martin Duke, &Eacute;ric Vyncke, and Lars Eggert for their useful feedback on this document.</t>
+</section> 
+
+<section title="Contributors">
+    <t>RFC 7322 limits the number of authors listed on the front page to a maximum of 5. The editor wishes to thank and acknowledge the following author for contributing text to this document</t>
+    <figure> <artwork><![CDATA[
+   Janos Farkas
+   Ericsson
+   Email: janos.farkas@ericsson.com
+   ]]></artwork>
+      </figure> 
 </section> 
 
 </middle>
@@ -1065,7 +1071,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     <?rfc include='reference.RFC.8939.xml'?>
     <?rfc include='reference.RFC.8964.xml'?>
     <?rfc include='reference.RFC.2475.xml'?>
-    <reference anchor="IEEE8021Q" target="http://ieeexplore.ieee.org/document/8403927">
+    <reference anchor="IEEE8021Q" target="https://ieeexplore.ieee.org/document/8403927">
         <front>
           <title>IEEE Std 802.1Q-2018: IEEE Standard for Local and metropolitan area networks - Bridges and Bridged Networks</title>
           <author>
@@ -1089,7 +1095,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     <!-- <?rfc include='reference.I-D.ietf-detnet-controller-plane-framework.xml'?> -->
     <reference anchor="I-D.ietf-detnet-controller-plane-framework" target="https://datatracker.ietf.org/doc/html/draft-ietf-detnet-controller-plane-framework">
         <front>
-          <title>Deterministic Networking (DetNet) Controller Plane Framework draft-ietf-detnet-controller-plane-framework-00</title>
+          <title>Deterministic Networking (DetNet) Controller Plane Framework draft-ietf-detnet-controller-plane-framework-01</title>
           <author>
             <organization>A. Malis, X. Geng, M. Chen, F. Qin, and B. Varga</organization>
           </author>
@@ -1099,7 +1105,7 @@ its (flow) regulation constraints; it is released at the earliest time at which 
     <!-- &I-D.draft-malis-detnet-controller-plane-framework; -->
 
     <reference anchor="IEEE8021Qcr"
-        target="http://www.ieee802.org/1/files/private/cr-drafts/">
+        target="https://www.ieee802.org/1/files/private/cr-drafts/">
         <front>
             <title>IEEE P802.1Qcr: IEEE Draft Standard for Local and metropolitan area networks - Bridges and Bridged Networks - Amendment: Asynchronous Traffic Shaping</title>
           <author>
@@ -1243,4 +1249,6 @@ its (flow) regulation constraints; it is released at the earliest time at which 
 </references>
 
 </back>
+
+
 </rfc>
